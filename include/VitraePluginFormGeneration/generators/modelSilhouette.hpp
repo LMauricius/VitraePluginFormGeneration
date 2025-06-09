@@ -96,6 +96,9 @@ inline Vitrae::DetailFormVector generateModelSilhouette(Vitrae::ComponentRoot &r
 
             // silhouetteForms.emplace_back(p_LoDMeasure, p_shape);
 
+            buf_silPositions.getRawBuffer()->synchronize();
+            buf_silIndices.getRawBuffer()->synchronize();
+
             silhouetteForms.emplace_back(
                 p_LoDMeasure,
                 root.getComponent<MeshKeeper>().new_asset({Mesh::TriangleVerticesParams{

@@ -95,6 +95,8 @@ namespace VitraePluginFormGeneration
         }
 
         // Return the buffers we want to add
+        p_tangentBuf.getRawBuffer()->synchronize();
+        p_bitangentBuf.getRawBuffer()->synchronize();
         return {
             {StandardParam::tangent.name, p_tangentBuf},
             {StandardParam::bitangent.name, p_bitangentBuf},

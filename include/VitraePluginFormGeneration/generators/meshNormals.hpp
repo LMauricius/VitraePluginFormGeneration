@@ -89,6 +89,7 @@ namespace VitraePluginFormGeneration
         }
 
         // Return the buffers we want to add
+        p_normalBuf.getRawBuffer()->synchronize();
         return {
             {StandardParam::normal.name, p_normalBuf},
         };
