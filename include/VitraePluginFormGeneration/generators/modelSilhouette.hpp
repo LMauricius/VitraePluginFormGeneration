@@ -2,7 +2,7 @@
 
 #include "VitraePluginFormGeneration/Standard/Params.hpp"
 
-#include "Vitrae/Assets/BufferUtil/SubPtr.hpp"
+#include "Vitrae/Assets/ImageUtil/SubPtr.hpp"
 #include "Vitrae/Assets/Model.hpp"
 #include "Vitrae/Assets/Shapes/Mesh.hpp"
 #include "Vitrae/Collections/ComponentRoot.hpp"
@@ -59,10 +59,10 @@ inline Vitrae::DetailFormVector generateModelSilhouette(Vitrae::ComponentRoot &r
             }
 
             // remove multi-entries
-            SharedBufferPtr<void, Triangle> buf_silIndices = makeBuffer<void, Triangle>(
-                root, BufferUsageHint::HOST_INIT | BufferUsageHint::GPU_DRAW, silEntries.size(),
+            StructImagePtr<void, Triangle> buf_silIndices = makeStructImage<void, Triangle>(
+                root, ImageUsageHint::HOST_INIT | ImageUsageHint::GPU_DRAW, silEntries.size(),
                 "silhouette index buffer");
-            auto silIndices = (SharedBufferPtr<void, unsigned int>(buf_silIndices.getRawBuffer()))
+            auto silIndices = (StructImagePtr<void, unsigned int>(buf_silIndices.getBinaryImage()))
                                   .getMutableElements();
             std::sort(silEntries.begin(), silEntries.end(),
                       [](const PositionWOrigin &a, const PositionWOrigin &b) {
@@ -85,10 +85,10 @@ inline Vitrae::DetailFormVector generateModelSilhouette(Vitrae::ComponentRoot &r
             }
             newInd++;
 
-            auto buf_silPositions = makeBuffer<void, glm::vec3>(
-                root, BufferUsageHint::HOST_INIT | BufferUsageHint::GPU_DRAW, newInd,
+            auto buf_silPositions = makeStructImage<void, glm::vec3>(
+                root, ImageUsageHint::HOST_INIT | ImageUsageHint::GPU_DRAW, newInd,
                 "silhouette position buffer");
-            auto silPositions = (SharedBufferPtr<void, glm::vec3>(buf_silPositions.getRawBuffer()))
+            auto silPositions = (StructImagePtr<void, glm::vec3>(buf_silPositions.getBinaryImage()))
                                     .getMutableElements();
             for (std::size_t i = 0; i < newInd; ++i) {
                 silPositions[i] = silEntries[i].position;
@@ -96,15 +96,15 @@ inline Vitrae::DetailFormVector generateModelSilhouette(Vitrae::ComponentRoot &r
 
             // silhouetteForms.emplace_back(p_LoDMeasure, p_shape);
 
-            buf_silPositions.getRawBuffer()->synchronize();
-            buf_silIndices.getRawBuffer()->synchronize();
+            buf_silPositions.getBinaryImage()->synchronize();
+            buf_silIndices.getBinaryImage()->synchronize();
 
             silhouetteForms.emplace_back(
                 p_LoDMeasure,
                 root.getComponent<MeshKeeper>().new_asset({Mesh::TriangleVerticesParams{
                     .root = root,
-                    .vertexComponentBuffers = {{StandardParam::position.name, buf_silPositions}},
-                    .indexBuffer = buf_silIndices,
+                    .vertexComponentImages = {{StandardParam::position.name, buf_silPositions}},
+                    .indexImage = buf_silIndices,
                     .friendlyname = "silhouette"}}));
         }
     }
